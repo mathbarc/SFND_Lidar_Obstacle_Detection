@@ -1,6 +1,7 @@
 /* \author Aaron Brown */
 // Quiz on implementing kd tree
-
+#ifndef KDTREE_H
+#define KDTREE_H
 #include "render.h"
 
 // Structure to represent node of kd tree
@@ -48,3 +49,4 @@ struct KdTree
         return ids;
     }
 };
+#endif
