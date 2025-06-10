@@ -25,3 +25,5 @@ target_link_libraries (quizCluster ${PCL_LIBRARIES} render)
 
 add_executable (quizRansac ${CMAKE_CURRENT_SOURCE_DIR}/quiz/ransac/ransac2d.cpp)
 target_link_libraries (quizRansac ${PCL_LIBRARIES} render)
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sensors/data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/sensors/data)
