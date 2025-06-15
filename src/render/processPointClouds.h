@@ -11,8 +11,10 @@
 #include <pcl/filters/crop_box.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/impl/point_types.hpp>
 #include <pcl/io/pcd_io.h>
 #include <pcl/kdtree/kdtree.h>
+#include <pcl/point_cloud.h>
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <string>
@@ -66,11 +68,35 @@ template <typename PointT> class ProcessPointClouds
         {
             // TODO: Create two new point clouds, one cloud with obstacles and
             // other with segmented plane
+            typename pcl::PointCloud<PointT>::Ptr selected(
+                new pcl::PointCloud<PointT>
+            );
+            typename pcl::PointCloud<PointT>::Ptr notSelected(
+                new pcl::PointCloud<PointT>
+            );
+
+            int currentIndex = 0;
+            size_t i = 0;
+            while (i < cloud->size() && currentIndex < inliers->indices.size())
+                {
+                    if (i == inliers->indices[currentIndex])
+                        {
+                            selected->push_back(cloud->points[i]);
+                            currentIndex++;
+                        }
+                    else { notSelected->push_back(cloud->points[i]); }
+                    i++;
+                }
+            while (i < cloud->size())
+                {
+                    notSelected->push_back(cloud->points[i]);
+                    i++;
+                }
 
             std::pair<
                 typename pcl::PointCloud<PointT>::Ptr,
                 typename pcl::PointCloud<PointT>::Ptr>
-                segResult(cloud, cloud);
+                segResult(selected, notSelected);
             return segResult;
         }
 
@@ -79,13 +105,27 @@ template <typename PointT> class ProcessPointClouds
             typename pcl::PointCloud<PointT>::Ptr>
         SegmentPlane(
             typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations,
-            float distanceThreshold
+            float distanceThreshold, bool optimizeCoeffs = false
         )
         {
             // Time segmentation process
             auto startTime = std::chrono::steady_clock::now();
-            pcl::PointIndices::Ptr inliers;
             // TODO:: Fill in this function to find inliers for the cloud.
+            pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients
+            );
+            pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
+            // Create the segmentation object
+            pcl::SACSegmentation<pcl::PointXYZ> seg;
+            // Optional
+            seg.setOptimizeCoefficients(optimizeCoeffs);
+            // Mandatory
+            seg.setModelType(pcl::SACMODEL_PLANE);
+            seg.setMethodType(pcl::SAC_RANSAC);
+            seg.setDistanceThreshold(distanceThreshold);
+            seg.setMaxIterations(maxIterations);
+
+            seg.setInputCloud(cloud);
+            seg.segment(*inliers, *coefficients);
 
             auto endTime = std::chrono::steady_clock::now();
             auto elapsedTime =
@@ -157,8 +197,9 @@ template <typename PointT> class ProcessPointClouds
         typename pcl::PointCloud<PointT>::Ptr loadPcd(std::string file)
         {
 
-            typename pcl::PointCloud<PointT>::Ptr
-                cloud(new pcl::PointCloud<PointT>);
+            typename pcl::PointCloud<PointT>::Ptr cloud(
+                new pcl::PointCloud<PointT>
+            );
 
             if (pcl::io::loadPCDFile<PointT>(file, *cloud) ==
                 -1) //* load the file
