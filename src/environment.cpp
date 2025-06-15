@@ -11,7 +11,7 @@
 // #include "processPointClouds.cpp"
 
 std::vector<Car>
-initHighway(bool renderScene, pcl::visualization::PCLVisualizer::Ptr &viewer)
+initHighway(bool renderScene, pcl::visualization::PCLVisualizer::Ptr& viewer)
 {
 
     Car egoCar(Vect3(0, 0, 0), Vect3(4, 2, 2), Color(0, 1, 0), "egoCar");
@@ -25,19 +25,18 @@ initHighway(bool renderScene, pcl::visualization::PCLVisualizer::Ptr &viewer)
     cars.push_back(car2);
     cars.push_back(car3);
 
-    if (renderScene)
-        {
-            renderHighway(viewer);
-            egoCar.render(viewer);
-            car1.render(viewer);
-            car2.render(viewer);
-            car3.render(viewer);
-        }
+    if (renderScene) {
+        renderHighway(viewer);
+        egoCar.render(viewer);
+        car1.render(viewer);
+        car2.render(viewer);
+        car3.render(viewer);
+    }
 
     return cars;
 }
 
-void simpleHighway(pcl::visualization::PCLVisualizer::Ptr &viewer)
+void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
 {
     // ----------------------------------------------------
     // -----Open 3D viewer and display simple highway -----
@@ -48,16 +47,14 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr &viewer)
     std::vector<Car> cars = initHighway(renderScene, viewer);
 
     // TODO:: Create lidar sensor
-    Lidar *lidarSensor = new Lidar(cars, 0, 8, pi / 64, 5, 0.2);
+    Lidar* lidarSensor = new Lidar(cars, 0, 8, pi / 64, 5, 0.2);
     auto lidarPointCloud = lidarSensor->scan();
     // renderRays(viewer, lidarSensor->position, lidarPointCloud);
     // renderPointCloud(viewer, lidarPointCloud, "simulation");
 
     // TODO:: Create point processor
     ProcessPointClouds<pcl::PointXYZ> processor;
-    std::pair<
-        pcl::PointCloud<pcl::PointXYZ>::Ptr,
-        pcl::PointCloud<pcl::PointXYZ>::Ptr>
+    std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr>
         plane = processor.SegmentPlane(lidarPointCloud, 10, 0.3);
 
     renderPointCloud(viewer, plane.first, "plane", Color(0, 1, 0));
@@ -67,9 +64,7 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr &viewer)
 }
 
 // setAngle: SWITCH CAMERA ANGLE {XY, TopDown, Side, FPS}
-void initCamera(
-    CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr &viewer
-)
+void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& viewer)
 {
 
     viewer->setBackgroundColor(0, 0, 0);
@@ -79,26 +74,25 @@ void initCamera(
     // distance away in meters
     int distance = 16;
 
-    switch (setAngle)
-        {
-            case XY:
-                viewer->setCameraPosition(
-                    -distance, -distance, distance, 1, 1, 0
-                );
-                break;
-            case TopDown:
-                viewer->setCameraPosition(0, 0, distance, 1, 0, 1);
-                break;
-            case Side:
-                viewer->setCameraPosition(0, -distance, 0, 0, 0, 1);
-                break;
-            case FPS: viewer->setCameraPosition(-10, 0, 0, 0, 0, 1);
-        }
+    switch (setAngle) {
+        case XY:
+            viewer->setCameraPosition(-distance, -distance, distance, 1, 1, 0);
+            break;
+        case TopDown:
+            viewer->setCameraPosition(0, 0, distance, 1, 0, 1);
+            break;
+        case Side:
+            viewer->setCameraPosition(0, -distance, 0, 0, 0, 1);
+            break;
+        case FPS:
+            viewer->setCameraPosition(-10, 0, 0, 0, 0, 1);
+    }
 
-    if (setAngle != FPS) viewer->addCoordinateSystem(1.0);
+    if (setAngle != FPS)
+        viewer->addCoordinateSystem(1.0);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     std::cout << "starting enviroment" << std::endl;
 
@@ -109,5 +103,7 @@ int main(int argc, char **argv)
     initCamera(setAngle, viewer);
     simpleHighway(viewer);
 
-    while (!viewer->wasStopped()) { viewer->spinOnce(); }
+    while (!viewer->wasStopped()) {
+        viewer->spinOnce();
+    }
 }
