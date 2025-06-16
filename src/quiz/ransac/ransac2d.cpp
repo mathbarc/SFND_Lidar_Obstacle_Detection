@@ -46,7 +46,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr
 CreateData3D()
 {
     ProcessPointClouds<pcl::PointXYZ> pointProcessor;
-    return pointProcessor.loadPcd("../../../sensors/data/pcd/simpleHighway.pcd");
+    return pointProcessor.loadPcd("./sensors/data/simpleHighway.pcd");
 }
 
 pcl::visualization::PCLVisualizer::Ptr
@@ -71,14 +71,14 @@ Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int maxIterations, float dista
     // TODO: Fill in this function
 
     // For max iterations
+    for (int i = 0; i < maxIterations; i++) {
+        // Randomly sample subset and fit line
 
-    // Randomly sample subset and fit line
+        // Measure distance between every point and fitted line
+        // If distance is smaller than threshold count it as inlier
 
-    // Measure distance between every point and fitted line
-    // If distance is smaller than threshold count it as inlier
-
-    // Return indicies of inliers from fitted line with most inliers
-
+        // Return indicies of inliers from fitted line with most inliers
+    }
     return inliersResult;
 }
 
